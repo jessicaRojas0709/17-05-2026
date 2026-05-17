@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Semanal · Mercadona · 1350 kcal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0F0D;--surface:#111713;--card:#161D19;--card2:#1C2620;
+  --green:#22C55E;--green-dim:#14532D;--green-light:#86EFAC;
+  --lime:#A3E635;--orange:#FB923C;--blue:#60A5FA;--purple:#C084FC;
+  --gold:#FDE68A;--gold-dim:#78350F;--red:#F87171;
+  --text:#F0FDF4;--muted:#6B7280;--border:#1F2D23;
+  --merc:#009B77;/* Mercadona green */
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;}
+
+.nav{position:sticky;top:0;z-index:100;background:rgba(10,15,13,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;overflow-x:auto;gap:0;}
+.nav-brand{font-family:'Syne',serif;font-size:12px;font-weight:800;color:var(--green);padding:13px 16px 13px 0;border-right:1px solid var(--border);margin-right:14px;white-space:nowrap;flex-shrink:0;letter-spacing:2px;text-transform:uppercase;}
+.tab{padding:13px 15px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.18s;white-space:nowrap;flex-shrink:0;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab.gym{color:#C084FC;}
+.tab.walk{color:#60A5FA;}
+.tab.rest{color:#6B7280;}
+
+.panel{display:none;max-width:940px;margin:0 auto;padding:26px 18px 60px;}
+.panel.active{display:block;}
+
+/* TOP ROW */
+.top-pills{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.pill{padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;}
+.p-gym{background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.25);}
+.p-walk{background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.25);}
+.p-rest{background:rgba(107,114,128,0.12);color:var(--muted);border:1px solid rgba(107,114,128,0.2);}
+.p-kcal{background:rgba(253,230,138,0.1);color:var(--gold);border:1px solid rgba(253,230,138,0.2);}
+.p-merc{background:rgba(0,155,119,0.12);color:var(--merc);border:1px solid rgba(0,155,119,0.25);}
+
+/* DAY HEADER */
+.day-hd{margin-bottom:18px;}
+.day-title{font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,34px);font-weight:800;line-height:1.1;}
+.day-title span{color:var(--green);}
+.day-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* GRID */
+.day-grid{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+@media(max-width:700px){.day-grid{grid-template-columns:1fr;}}
+
+/* KCAL STRIP */
+.kcal-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.ks{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.ks-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;display:block;transition:color 0.3s;}
+.ks-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+/* TRACKER */
+.tbar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+.tbar-top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px;}
+.tbar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;display:flex;}
+.tseg{height:100%;transition:width 0.5s cubic-bezier(0.4,0,0.2,1);}
+.tbar-leg{display:flex;gap:10px;margin-top:7px;flex-wrap:wrap;}
+.tleg{font-size:10px;display:flex;align-items:center;gap:4px;color:var(--muted);transition:all 0.2s;}
+.tleg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.live-bar{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:11px;color:var(--muted);display:flex;gap:8px;margin-bottom:14px;}
+
+/* MEAL CARD */
+.mc{background:var(--card);border:1px solid var(--border);border-radius:13px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.18s;}
+.mc:hover{box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.mc-top{display:flex;align-items:center;gap:10px;padding:12px 15px;cursor:pointer;border-bottom:1px solid transparent;transition:border-color 0.18s;}
+.mc.open .mc-top{border-bottom-color:var(--border);}
+.mc-emoji{font-size:22px;flex-shrink:0;}
+.mc-meta{flex:1;}
+.mc-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.mc-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.mc-kcal{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--green);flex-shrink:0;}
+.mc-kcal small{font-size:9px;color:var(--muted);font-family:'Inter';font-weight:400;}
+.chev{color:var(--muted);font-size:10px;margin-left:5px;transition:transform 0.18s;flex-shrink:0;}
+.mc.open .chev{transform:rotate(180deg);}
+.mc-chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:11px;transition:all 0.18s;color:var(--muted);margin-left:4px;}
+.mc-chk:hover{border-color:var(--green);}
+.mc.ticked .mc-chk{background:var(--green-dim);border-color:var(--green);color:var(--green-light);}
+.mc.ticked .mc-name{text-decoration:line-through;opacity:0.45;}
+.mc.ticked{opacity:0.65;}
+.mc-body{display:none;padding:13px 15px 15px;}
+.mc.open .mc-body{display:block;}
+.merc-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(0,155,119,0.1);color:var(--merc);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;margin-bottom:9px;border:1px solid rgba(0,155,119,0.2);}
+.ing{list-style:none;margin-bottom:11px;}
+.ing li{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.ing li:last-child{border-bottom:none;}
+.ing li span{color:var(--green);font-size:10px;font-weight:600;}
+.ing li em{color:var(--merc);font-size:9px;font-style:normal;margin-left:4px;}
+.steps-box{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px 12px;}
+.steps-box h4{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:7px;font-weight:600;}
+.step{display:flex;gap:7px;margin-bottom:5px;font-size:11px;color:var(--muted);line-height:1.5;}
+.step:last-child{margin-bottom:0;}
+.sn{background:var(--green-dim);color:var(--green-light);width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.tip{margin-top:8px;background:rgba(34,197,94,0.06);border-left:2px solid var(--green-dim);padding:6px 10px;font-size:10px;color:var(--green-light);border-radius:0 5px 5px 0;}
+
+/* RIGHT COLUMN */
+.right-col{display:flex;flex-direction:column;gap:12px;}
+.act-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+.act-hd{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;}
+.act-icon{font-size:20px;flex-shrink:0;}
+.act-title-wrap{flex:1;}
+.act-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.act-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.act-burn{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--red);}
+.act-burn small{font-size:9px;color:var(--muted);font-family:'Inter';font-weight:400;}
+.act-body{padding:12px 15px;}
+.act-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--purple);font-weight:600;margin-bottom:7px;}
+.ex-list{list-style:none;}
+.ex-list li{font-size:11px;color:var(--muted);padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;gap:8px;}
+.ex-list li:last-child{border-bottom:none;}
+.ex-list li span{color:var(--text);font-size:10px;white-space:nowrap;}
+.walk-box{background:rgba(96,165,250,0.07);border-radius:9px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.walk-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--blue);line-height:1;}
+.walk-info{font-size:11px;color:var(--muted);line-height:1.6;}
+.walk-info strong{color:var(--text);display:block;font-size:12px;}
+.yoga-box{background:rgba(34,197,94,0.06);border-radius:9px;padding:10px 13px;}
+.yoga-name{font-size:12px;font-weight:600;color:var(--green);margin-bottom:3px;}
+.yoga-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.deficit-box{background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(192,132,252,0.08));border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:12px 14px;}
+.db-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:600;}
+.db-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--muted);}
+.db-row span:last-child{font-weight:600;color:var(--text);}
+.db-total{border-top:1px solid rgba(255,255,255,0.08);margin-top:7px;padding-top:7px;display:flex;justify-content:space-between;font-size:12px;font-weight:700;}
+.rest-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:20px;text-align:center;}
+.rest-icon{font-size:40px;margin-bottom:10px;}
+.rest-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.rest-text{font-size:12px;color:var(--muted);line-height:1.7;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🛒 Mercadona</div>
+  <div class="tab active gym" onclick="showTab('lun',this)">💪 Lun</div>
+  <div class="tab gym" onclick="showTab('mar',this)">💪 Mar</div>
+  <div class="tab walk" onclick="showTab('mie',this)">🚶 Mié</div>
+  <div class="tab gym" onclick="showTab('jue',this)">💪 Jue</div>
+  <div class="tab gym" onclick="showTab('vie',this)">💪 Vie</div>
+  <div class="tab walk" onclick="showTab('sab',this)">🚶 Sáb</div>
+  <div class="tab rest" onclick="showTab('dom',this)">😴 Dom</div>
+</nav>
+
+<div id="app"></div>
+
+<script>
+const GOAL=1350,TMB=1574;
+const ST={};
+const SC={des:'#F87171',com:'#FDE68A',snk:'#60A5FA',cen:'#22C55E'};
+const KS=['des','com','snk','cen'];
+
+const DK={
+  lun:{des:340,com:470,snk:185,cen:360},
+  mar:{des:350,com:460,snk:185,cen:360},
+  mie:{des:340,com:470,snk:185,cen:360},
+  jue:{des:350,com:460,snk:185,cen:360},
+  vie:{des:340,com:470,snk:185,cen:360},
+  sab:{des:350,com:460,snk:185,cen:360},
+  dom:{des:350,com:460,snk:185,cen:360},
+};
+
+function showTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function tog(el){el.classList.toggle('open');}
+
+function tick(e,day,mk){
+  e.stopPropagation();
+  if(!ST[day])ST[day]={};
+  ST[day][mk]=!ST[day][mk];
+  const card=document.getElementById(day+'-c-'+mk);
+  const chk=document.getElementById(day+'-k-'+mk);
+  if(ST[day][mk]){card.classList.add('ticked');chk.style.transform='scale(1.3)';setTimeout(()=>chk.style.transform='scale(1)',180);}
+  else card.classList.remove('ticked');
+  upBar(day);
+}
+
+function upBar(day){
+  const s=ST[day]||{},k=DK[day];
+  let tot=0;KS.forEach(mk=>{if(s[mk])tot+=k[mk];});
+  const pct=Math.min(100,Math.round(tot/GOAL*100)),over=tot>GOAL;
+  KS.forEach(mk=>{
+    const sg=document.getElementById(day+'-s-'+mk),lg=document.getElementById(day+'-l-'+mk);
+    if(sg)sg.style.width=s[mk]?Math.round(k[mk]/GOAL*100)+'%':'0%';
+    if(lg){lg.style.opacity=s[mk]?'1':'0.35';lg.style.fontWeight=s[mk]?'600':'400';}
+  });
+  const pe=document.getElementById(day+'-pct');if(pe)pe.textContent=pct+'%';
+  const be=document.getElementById(day+'-big');if(be){be.textContent=tot;be.style.color=over?'var(--red)':'var(--text)';}
+  const le=document.getElementById(day+'-left');if(le)le.textContent=over?'+'+(tot-GOAL)+' sobre meta':GOAL-tot+'';
+  const te=document.getElementById(day+'-txt');
+  if(te){
+    const done=KS.every(mk=>s[mk]);const col=over?'var(--red)':'var(--green)';
+    if(tot===0)te.innerHTML='Toca ✓ al terminar cada comida';
+    else if(done)te.innerHTML='🎉 Día completado — <strong style="color:'+col+'">'+tot+' kcal</strong> · '+(over?'⚠️ Sobre meta':'✓ En déficit');
+    else te.innerHTML='Consumido: <strong style="color:'+col+'">'+tot+' kcal</strong> · quedan '+(GOAL-tot)+' kcal';
+  }
+}
+
+function C(day,mk,em,name,sub,kcal,ings,steps,tip){
+  const iH=ings.map(([f,k,m])=>'<li>'+f+(m?'<em>🛒 '+m+'</em>':'')+'<span>'+k+'</span></li>').join('');
+  const sH=steps.map((s,i)=>'<div class="step"><div class="sn">'+(i+1)+'</div><span>'+s+'</span></div>').join('');
+  const tH=tip?'<div class="tip">💡 '+tip+'</div>':'';
+  return '<div class="mc" id="'+day+'-c-'+mk+'" onclick="tog(this)"><div class="mc-top"><div class="mc-emoji">'+em+'</div><div class="mc-meta"><div class="mc-name">'+name+'</div><div class="mc-sub">'+sub+'</div></div><div class="mc-kcal">~'+kcal+'<small> kcal</small></div><div class="chev">▼</div><div class="mc-chk" id="'+day+'-k-'+mk+'" onclick="tick(event,\''+day+'\',\''+mk+'\')">✓</div></div><div class="mc-body"><div class="merc-badge">🛒 Disponible en Mercadona</div><ul class="ing">'+iH+'</ul><div class="steps-box"><h4>Preparación</h4>'+sH+'</div>'+tH+'</div></div>';
+}
+
+function bar(day,k){
+  const segs=KS.map(mk=>'<div class="tseg" id="'+day+'-s-'+mk+'" style="width:0%;background:'+SC[mk]+'"></div>').join('');
+  const legs=KS.map((mk,i)=>{const lb=['Des ~'+k.des,'Com ~'+k.com,'Snk ~'+k.snk,'Cen ~'+k.cen];return'<div class="tleg" id="'+day+'-l-'+mk+'" style="opacity:0.35"><div class="tleg-dot" style="background:'+SC[mk]+'"></div>'+lb[i]+'</div>';}).join('');
+  return '<div class="tbar"><div class="tbar-top"><span id="'+day+'-pct">0%</span><span>meta 1,350 kcal</span></div><div class="tbar-track">'+segs+'</div><div class="tbar-leg">'+legs+'</div></div>';
+}
+
+function kstrip(day,k,burn){
+  const net=TMB+burn-k.des-k.com-k.snk-k.cen;
+  return '<div class="kcal-strip"><div class="ks"><span class="ks-num" id="'+day+'-big" style="color:var(--green)">0</span><div class="ks-lbl">ingeridas</div></div><div class="ks"><span class="ks-num" style="color:var(--red)">~'+burn+'</span><div class="ks-lbl">quemadas</div></div><div class="ks"><span class="ks-num" style="color:var(--lime)">~'+net+'</span><div class="ks-lbl">déficit neto</div></div><div class="ks"><span class="ks-num" id="'+day+'-left" style="color:var(--gold)">'+GOAL+'</span><div class="ks-lbl">disponibles</div></div></div>';
+}
+
+function snk(day){
+  return C(day,'snk','💪','Snack · Proteína vegetal','~17:00h',185,
+    [['Whey protein vegetal (1 scoop)','120 kcal','tu marca habitual'],['Leche de soya sin azúcar (250ml)','65 kcal','Hacendado soya']],
+    ['Shaker con hielo. 30 segundos.'],null);
+}
+
+function gym(day,muscles,exs,burn){
+  const eH=exs.map(([n,s,t])=>'<li>'+n+(t?'<br><span style="color:var(--muted);font-size:9px">→ '+t+'</span>':'')+'<span>'+s+'</span></li>').join('');
+  return '<div class="act-card"><div class="act-hd"><div class="act-icon">🏋️</div><div class="act-title-wrap"><div class="act-title">Gym · '+muscles+'</div><div class="act-sub">~60–75 min</div></div><div class="act-burn">~'+burn+'<small> kcal</small></div></div><div class="act-body"><div class="act-label">Ejercicios</div><ul class="ex-list">'+eH+'</ul></div></div>';
+}
+
+function walk(burn){
+  return '<div class="act-card"><div class="act-hd"><div class="act-icon">🚶</div><div class="act-title-wrap"><div class="act-title">Caminata · 10,000 pasos</div><div class="act-sub">~80–90 min · ritmo moderado</div></div><div class="act-burn">~'+burn+'<small> kcal</small></div></div><div class="act-body"><div class="walk-box"><div class="walk-num">10k</div><div class="walk-info"><strong>~7–8 km · ~80 min</strong>Ritmo 5.5 km/h · zona quema grasa</div></div><ul class="ex-list"><li>Primeros 10 min<span>Calentamiento suave</span></li><li>60 min<span>Ritmo sostenido constante</span></li><li>Últimos 10 min<span>Enfriamiento</span></li></ul></div></div>';
+}
+
+function yoga(style,dur,desc){
+  return '<div class="act-card"><div class="act-hd"><div class="act-icon">🧘</div><div class="act-title-wrap"><div class="act-title">Yoga en casa · '+style+'</div><div class="act-sub">~'+dur+' min</div></div><div class="act-burn">~60<small> kcal</small></div></div><div class="act-body"><div class="yoga-box"><div class="yoga-name">'+style+'</div><div class="yoga-desc">'+desc+'</div></div></div></div>';
+}
+
+function deficit(day,burn,tipo){
+  const k=DK[day],tot=k.des+k.com+k.snk+k.cen,net=TMB+burn-tot;
+  return '<div class="deficit-box"><div class="db-title">💥 Déficit estimado del día</div><div class="db-row"><span>Kcal ingeridas</span><span style="color:var(--red)">~'+tot+' kcal</span></div><div class="db-row"><span>TMB + '+tipo+'</span><span style="color:var(--green)">~'+(TMB+burn)+' kcal</span></div><div class="db-total"><span>Déficit neto</span><span style="color:var(--lime)">~'+net+' kcal</span></div></div>';
+}
+
+// ─── DATA ────────────────────────────────────────────────
+const DATA={
+
+lun:{label:'Lunes',date:'💪 Gym · Espalda + Bíceps + Core',type:'gym',burn:370,
+  des:['🍳','Tostada con huevo y aguacate','7:30h',340,
+    [['Pan integral (2 rebanadas)','140 kcal','Bimbo integral o similar'],['Huevo a la plancha (1 pza)','75 kcal',null],['Aguacate (¼ pza)','80 kcal',null],['Fruta: naranja o kiwi','60 kcal',null]],
+    ['Tuesta el pan. Aplasta el aguacate con sal y limón.','Huevo a la plancha en sartén con spray. Pan + aguacate + huevo.','Fruta al lado.'],
+    'Pre-gym: carbohidratos + proteína = energía sostenida para el entreno.'],
+  com:['🍗','Pechuga de pollo con arroz y calabacín','13:30h',470,
+    [['Pechuga de pollo (150g)','165 kcal','Hacendado fresca o congelada'],['Arroz blanco o basmati (85g seco)','300 kcal','Arroz Hacendado — guarda ½ para mañana'],['Calabacín (150g)','25 kcal',null],['Aceite oliva virgen (½ cdita)','20 kcal','Hacendado AOVE']],
+    ['Cuece el arroz (20 min). Guarda la mitad en tupper.','Pollo a la plancha con limón y orégano, 5 min/lado.','Calabacín al vapor 8 min o en sartén.'],
+    'Guarda el arroz sobrante: te ahorras cocinar mañana.'],
+  cen:['🐟','Salmón al horno con boniato y espinacas','20:30h',360,
+    [['Salmón fresco o congelado (130g)','175 kcal','Hacendado lomo salmón'],['Boniato (130g)','113 kcal',null],['Espinacas baby (bolsa)','20 kcal','Hacendado bolsa lavada'],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Horno 190°C: boniato en dados 25 min, salmón los últimos 15 con limón.','Espinacas salteadas 2 min con ajo.'],
+    'Omega-3 del salmón reduce inflamación muscular post-entreno.'],
+  right:()=>gym('lun','Espalda + Bíceps + Core',[
+    ['Dominadas asistidas (banda)','4×6–8','Reduce asistencia ½ kg vs semana pasada'],
+    ['Remo con mancuerna','4×10','Espalda plana, codo cerca del cuerpo'],
+    ['Jalón al pecho agarre supino','3×12','Activa más el bíceps'],
+    ['Curl de bíceps mancuernas','3×12–15','Sin balanceo, movimiento limpio'],
+    ['Ab wheel rollout','3×8–10','Sal solo hasta donde controlas la vuelta'],
+    ['Plancha frontal','3×50 seg','Core activo, no dejes caer caderas'],
+  ],370)+deficit('lun',370,'Gym')},
+
+mar:{label:'Martes',date:'💪 Gym · Cuádriceps + Glúteos',type:'gym',burn:360,
+  des:['🥣','Yogur griego con avena y fruta','7:30h',350,
+    [['Yogur griego 0% (200g)','120 kcal','Hacendado yogur griego natural'],['Avena en copos (35g)','130 kcal','Quaker o Hacendado'],['Fruta (fresas o arándanos, 100g)','50 kcal',null],['Nueces (10g)','65 kcal',null]],
+    ['Mezcla yogur + avena. Fruta y nueces encima. O prepáralo la noche anterior.'],
+    'Pre-gym pierna: carga carbohidratos. La avena libera energía gradual — perfecta.'],
+  com:['🍗','Arroz del lunes con pollo y pisto Mercadona','13:30h',460,
+    [['Arroz guardado (~190g cocido)','230 kcal',null],['Pechuga de pollo (130g)','143 kcal',null],['Pisto Mercadona (½ bote, ~200g)','80 kcal','Hacendado pisto — aisle conservas'],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Calienta el arroz en sartén con agua, 3 min.','Saltea el pollo en trozos 5 min. Añade el pisto y calienta 3 min.','Mezcla todo.'],
+    'El pisto Mercadona es tu hack favorito: listo en 3 min, ~40 kcal/100g.'],
+  cen:['🐟','Atún con pasta de lentejas y tomate cherry','20:30h',360,
+    [['Atún en agua (2 latas, ~160g)','160 kcal','Hacendado atún claro en agua'],['Pasta de lentejas (55g seco)','180 kcal','Garofalo o similar en Mercadona'],['Tomate cherry (100g)','18 kcal',null],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Cuece la pasta de lentejas 8 min. Escurre.','Mezcla con el atún escurrido y los cherry partidos.','Aceite y orégano por encima.'],
+    'La pasta de lentejas tiene ~13g proteína/100g. Más saciante que pasta normal.'],
+  right:()=>gym('mar','Cuádriceps + Glúteos',[
+    ['Sentadilla Smith','4×10','Más profundidad que semana pasada'],
+    ['Leg press','4×12','Pies a anchura de caderas'],
+    ['Hip thrust barra','4×12','Aprieta glúteos 1 seg arriba'],
+    ['Extensión cuádriceps máquina','3×15','Sin rebote, movimiento controlado'],
+    ['Zancadas con mancuerna','3×10/pierna','Paso largo, rodilla trasera baja'],
+    ['Nordic curl negativo','3×5','Baja 5 seg, ayúdate a subir'],
+  ],360)+deficit('mar',360,'Gym')},
+
+mie:{label:'Miércoles',date:'🚶 Caminata 10k + 🧘 Yoga',type:'walk',burn:480,
+  des:['🥣','Overnight oats con plátano','8:00h',340,
+    [['Yogur griego 0% (150g)','90 kcal','Hacendado'],['Avena copos (35g)','130 kcal',null],['Leche de soya (50ml)','13 kcal','Hacendado soya'],['Plátano (1 pza)','90 kcal',null]],
+    ['NOCHE ANTERIOR: mezcla avena + yogur + leche en tarro. Nevera.','Mañana: plátano en rodajas encima. Sin cocinar nada.'],
+    'Día de caminata: come carbohidratos para tener energía en los 10k.'],
+  com:['🍗','Pollo al horno con boniato y judías verdes','14:00h',470,
+    [['Muslo de pollo sin piel (160g)','200 kcal','Hacendado muslos congelados SIN piel'],['Boniato (150g)','130 kcal',null],['Judías verdes (150g)','40 kcal','Hacendado judías verdes congeladas'],['Aceite oliva (½ cda)','40 kcal',null],['Pimentón + ajo polvo','5 kcal',null]],
+    ['Horno 200°C: boniato en dados + muslo con pimentón y ajo, 35 min.','Judías verdes: 6 min en microondas o hervidas.'],
+    null],
+  cen:['🐟','Merluza al vapor con arroz y zanahoria','20:30h',360,
+    [['Merluza (150g)','130 kcal','Hacendado merluza congelada en lomos'],['Arroz blanco (80g seco)','280 kcal','Guarda la mitad para jueves'],['Zanahoria (150g)','52 kcal',null],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Cuece arroz 20 min. Guarda la mitad.','Merluza al vapor 8 min o al micro con film 4 min.','Zanahoria cocida al vapor.'],
+    'La zanahoria cocida es fácil de digerir y ayuda a estabilizar el intestino.'],
+  right:()=>walk(420)+yoga('Yin Yoga · Recuperación',30,'Post-caminata: caderas, isquios y espalda baja. Busca "Yin Yoga 30 min caderas" en YouTube — Adriene o Boho Beautiful.')+deficit('mie',480,'Caminata')},
+
+jue:{label:'Jueves',date:'💪 Gym · Isquios + Glúteos',type:'gym',burn:360,
+  des:['🍳','Tostada con salmón ahumado y yogur','7:30h',350,
+    [['Pan integral (2 rebanadas)','140 kcal',null],['Salmón ahumado (70g)','105 kcal','Hacendado salmón ahumado — refrigerados'],['Yogur griego (80g) untado','48 kcal',null],['Fruta: kiwi o naranja','60 kcal',null]],
+    ['Tuesta el pan. Unta el yogur como base cremosa.','Lonchas de salmón encima. Pimienta negra.','Fruta al lado.'],
+    'El yogur como untable = probióticos + proteína. Sustituye el feta perfectamente.'],
+  com:['🍗','Arroz del miércoles con pollo y espinacas salteadas','13:30h',460,
+    [['Arroz guardado (~180g cocido)','220 kcal',null],['Pechuga de pollo (140g)','154 kcal',null],['Espinacas baby (80g)','18 kcal','Hacendado bolsa'],['Pisto Mercadona (¼ bote)','40 kcal',null],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Saltea pollo en trozos 5 min. Añade espinacas y pisto 2 min más.','Calienta el arroz en sartén con agua. Mezcla todo.'],
+    null],
+  cen:['🐟','Tofu salteado con arroz y verduras','20:30h',360,
+    [['Tofu firme (150g)','108 kcal','Mercadona tiene tofu firme en refrigerados'],['Arroz blanco (75g seco)','263 kcal','Guarda la mitad para viernes'],['Pimiento + calabacín + zanahoria (200g)','55 kcal',null],['Salsa de soja sin gluten (1 cda)','10 kcal',null],['Aceite de sésamo (½ cdita)','20 kcal',null]],
+    ['Cuece arroz (20 min). Guarda la mitad.','Corta el tofu en dados y saltea 5 min hasta dorado. Reserva.','Saltea las verduras 5 min. Añade el tofu, soja y sésamo. Mezcla con arroz.'],
+    'El tofu necesita dorarse bien para tener buena textura — sartén caliente y sin mover los primeros 2 min.'],
+  right:()=>gym('jue','Isquios + Glúteos',[
+    ['Peso muerto rumano mancuernas','4×10','Espalda neutra, siente estiramiento isquios'],
+    ['Hip thrust banco','4×12','Sin barra si no tienes — con mancuerna en cadera'],
+    ['Curl isquios máquina','3×12','Lento en la bajada, 2 seg'],
+    ['Abducción máquina','3×15','Aprieta el glúteo medio arriba'],
+    ['Plancha lateral','3×45 seg/lado','Cadera arriba, cuerpo en línea'],
+    ['Nordic curl negativo','3×5','Isquios: 5 seg bajando, ayúdate a subir'],
+  ],360)+deficit('jue',360,'Gym')},
+
+vie:{label:'Viernes',date:'💪 Gym · Pecho + Hombros + Tríceps',type:'gym',burn:350,
+  des:['🍌','Tortitas de avena y plátano','7:30h',340,
+    [['Avena copos (45g)','167 kcal',null],['Plátano (1 pza)','90 kcal',null],['Huevo (1 pza)','75 kcal',null],['Miel (½ cdita)','15 kcal',null]],
+    ['Tritura avena + plátano + huevo hasta pasta homogénea.','Cuaja 3–4 tortitas pequeñas en sartén antiadherente, 2 min/lado.','Miel por encima.'],
+    'Sin harina, sin azúcar, sin gluten. Solo avena + plátano + huevo. Perfectas.'],
+  com:['🍗','Arroz del jueves con pollo y pisto','13:30h',470,
+    [['Arroz guardado (~170g cocido)','205 kcal',null],['Pechuga de pollo (140g)','154 kcal',null],['Pisto Mercadona (½ bote)','80 kcal',null],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Calienta arroz + pisto juntos en sartén 4 min.','Pollo a la plancha, añade encima. Listo.'],
+    'Viernes: sin complicaciones. El pisto de Mercadona hace el trabajo.'],
+  cen:['🐟','Salmón en lata con pasta de garbanzos','20:30h',360,
+    [['Salmón en lata al natural (130g)','180 kcal','Hacendado salmón al natural'],['Pasta de garbanzos (55g seco)','190 kcal','Sección dietética Mercadona o Garofalo'],['Tomate cherry + pepino','30 kcal',null],['Aceite oliva (½ cdita)','20 kcal',null]],
+    ['Cuece la pasta de garbanzos 8 min. Escurre.','Mezcla con el salmón desmenuzado, cherry y pepino.','Aceite, limón y orégano.'],
+    'La pasta de garbanzos + salmón = ~40g proteína. Cena perfecta post-gym tren superior.'],
+  right:()=>gym('vie','Pecho + Hombros + Tríceps',[
+    ['Press banca mancuernas','4×10','Codos 45°, baja hasta pecho'],
+    ['Press militar mancuernas (sentada)','4×10','Core activado, no arquees espalda'],
+    ['Aperturas banco inclinado','3×12','Arco en movimiento, no bloquees codos'],
+    ['Elevaciones laterales','3×15','Codos ligeramente flexionados'],
+    ['Fondos banco tríceps','3×12','Espalda cerca del banco, baja 90°'],
+    ['Extensión tríceps polea','3×15','Codos pegados al cuerpo siempre'],
+  ],350)+deficit('vie',350,'Gym')},
+
+sab:{label:'Sábado',date:'🚶 Caminata 10k + 🧘 Yoga',type:'walk',burn:480,
+  des:['🥣','Yogur con copos de arroz y fruta','9:00h',350,
+    [['Yogur griego 0% (200g)','120 kcal','Hacendado'],['Copos de arroz (35g)','130 kcal','Hacendado o Nestlé'],['Papaya o mango (120g)','70 kcal',null],['Nueces (10g)','65 kcal',null]],
+    ['Mezcla yogur + copos. Fruta y nueces encima.'],
+    'Sábado tranquilo: desayuna sin prisa, mastica bien.'],
+  com:['🍗','Pollo al horno con patata y pimiento','14:00h',460,
+    [['Muslo de pollo sin piel (160g)','200 kcal','Hacendado'],['Patata en gajos (150g)','120 kcal',null],['Pimiento rojo + cebolla (150g)','55 kcal',null],['Aceite oliva (½ cda)','40 kcal',null],['Tomillo + romero','0 kcal',null]],
+    ['Horno 200°C: todo junto en bandeja con aceite y hierbas, 40 min.','Dale la vuelta al pollo a mitad.'],
+    'Carga carbohidratos antes de los 10k de esta tarde.'],
+  cen:['🐟','Tofu con verduras salteadas y arroz','20:30h',360,
+    [['Tofu firme (150g)','108 kcal','Mercadona refrigerados'],['Arroz blanco (75g seco)','263 kcal',null],['Brócoli congelado (150g)','52 kcal','Hacendado brócoli congelado'],['Salsa de soja (1 cda)','10 kcal',null],['Aceite sésamo (½ cdita)','20 kcal',null]],
+    ['Cuece arroz 20 min.','Tofu en dados, saltea 5 min hasta dorado. Reserva.','Brócoli en microondas 4 min. Saltea todo con soja y sésamo.'],
+    'El brócoli congelado de Mercadona es exactamente igual de nutritivo que el fresco. Sin excusas.'],
+  right:()=>walk(420)+yoga('Yoga Flow · Movilidad',35,'Columna, hombros y cadera. Busca "Yoga Flow movilidad 35 min" en YouTube — Ideal después de la caminata para soltar piernas y espalda.')+deficit('sab',480,'Caminata')},
+
+dom:{label:'Domingo',date:'😴 Descanso activo',type:'rest',burn:150,
+  des:['🥣','Overnight oats completo','9:30h',350,
+    [['Yogur griego (150g)','90 kcal','Hacendado'],['Avena (35g)','130 kcal',null],['Leche de soya (50ml)','13 kcal',null],['Fruta variada (120g)','70 kcal',null],['Nueces (10g)','65 kcal',null]],
+    ['Preparado la noche anterior. Por la mañana añade fruta y nueces.'],
+    'Domingo: recarga. Come sin estrés.'],
+  com:['🐟','Ensalada templada de salmón con garbanzos','14:00h',460,
+    [['Salmón fresco a la plancha (140g)','185 kcal','Hacendado'],['Garbanzos cocidos bote (100g)','140 kcal','Hacendado bote garbanzos'],['Tomate cherry + pepino + rúcula','40 kcal',null],['Aceite oliva (1 cdita)','40 kcal',null],['Limón + orégano','5 kcal',null]],
+    ['Salmón a la plancha 4 min/lado con sal y limón.','Mezcla garbanzos + verduras. Salmón en lascas encima.','Aliña con aceite y orégano.'],
+    null],
+  cen:['🍗','Pechuga de pollo con pasta integral y calabacín','20:00h',360,
+    [['Pechuga de pollo (130g)','143 kcal',null],['Pasta integral (60g seco)','210 kcal','Hacendado pasta integral'],['Calabacín (150g)','25 kcal',null],['Tomate frito Mercadona (2 cdas)','30 kcal','Hacendado tomate frito']],
+    ['Cuece la pasta 10 min. Reserva.','Pollo en tiras salteadas con calabacín 6 min.','Mezcla con la pasta y el tomate frito.'],
+    'Domingo noche: cena sencilla para cerrar la semana bien.'],
+  right:()=>'<div class="rest-card"><div class="rest-icon">🛁</div><div class="rest-title">Día de recuperación</div><div class="rest-text">Nada de gym hoy. El músculo crece en el descanso, no en el entreno.<br><br>✅ Caminar suave 20–30 min si apetece<br>✅ Estiramientos 10 min<br>✅ Dormir 7–8 horas esta noche<br>✅ Hidratación: 2L de agua<br><br>La semana que viene vuelves más fuerte.</div></div>'+deficit('dom',150,'Descanso')},
+};
+
+// BUILD ALL PANELS
+const app=document.getElementById('app');
+Object.entries(DATA).forEach(([id,d])=>{
+  const k=DK[id];
+  const typeMap={gym:'<span class="pill p-gym">💪 Gym</span>',walk:'<span class="pill p-walk">🚶 10k Pasos</span><span class="pill p-yoga">🧘 Yoga</span>',rest:'<span class="pill p-rest">😴 Descanso</span>'};
+  const pills='<div class="top-pills"><span class="pill p-merc">🛒 Mercadona</span>'+(typeMap[d.type]||'')+'<span class="pill p-kcal">🎯 1,350 kcal</span></div>';
+  const hdr='<div class="day-hd"><div class="day-title">'+d.label+'<br><span style="font-size:clamp(13px,2vw,16px);font-weight:600;color:var(--muted)">'+d.date+'</span></div></div>';
+  const food='<div class="col-food">'+kstrip(id,k,d.burn)+bar(id,k)+C(id,'des',...d.des)+C(id,'com',...d.com)+snk(id)+C(id,'cen',...d.cen)+'<div class="live-bar"><span>🎯</span><span id="'+id+'-txt">Toca ✓ al terminar cada comida</span></div></div>';
+  const right='<div class="right-col">'+d.right()+'</div>';
+  const panel=document.createElement('div');
+  panel.className='panel'+(id==='lun'?' active':'');
+  panel.id='tab-'+id;
+  panel.innerHTML=pills+hdr+'<div class="day-grid">'+food+right+'</div>';
+  app.appendChild(panel);
+});
+</script>
+</body>
+</html>
